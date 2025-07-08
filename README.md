@@ -1,7 +1,3 @@
-Claro! Aqui está o texto com todas as **acentuações corrigidas**:
-
----
-
 **Questão 1: \[10 pontos]**
 
 Implemente um programa em linguagem de sua escolha (C, Python, Java, etc.) que simule o funcionamento básico de um sistema de arquivos baseado em i-nodes. O sistema deve suportar as seguintes operações:
