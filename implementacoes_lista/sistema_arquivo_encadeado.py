@@ -1,4 +1,4 @@
-from implementacoes_lista.bloco import Bloco
+from .bloco import Bloco
 
 class ArquivoEncadeado:
     def __init__(self, nome, tamanho=0):
@@ -74,28 +74,80 @@ class SistemaArquivosEncadeado:
         else:
             print("Diretório não encontrado.")
     
-    def mover(self, origem, caminho_destino):
-      if origem not in self.atual:
-          print("Origem não encontrada.")
-          return
+    def _resolve_path(self, path: str):
+        if path.startswith('/'):
+            base = []                  # partir do root
+            partes = [p for p in path.split('/') if p]
+        else:
+            base = list(self.caminho)  # partir do diretório atual
+            partes = [p for p in path.split('/') if p]
 
-      partes = caminho_destino.strip("/").split("/")
-      nome_destino = partes[-1]
-      destino_diretorio = self.raiz
+        # 2) junta e normaliza “.” e “..”
+        stack = []
+        for p in base + partes:
+            if p == '.' or p == '':
+                continue
+            if p == '..':
+                if stack:
+                    stack.pop()
+            else:
+                stack.append(p)
 
-      for parte in partes[:-1]:
-          if parte not in destino_diretorio or destino_diretorio[parte]["tipo"] != "diretorio":
-              print(f"Diretório '{parte}' não encontrado no caminho.")
-              return
-          destino_diretorio = destino_diretorio[parte]["obj"]
+        # 3) separa em “pai” + “nome_final”
+        if not stack:
+            # movendo/operando no próprio /
+            return self.raiz, ''
+        pai_partes = stack[:-1]
+        nome_final = stack[-1]
 
-      if nome_destino in destino_diretorio:
-          print("Destino já existe.")
-          return
+        # 4) caminha do root até o “pai”
+        atual = self.raiz
+        for p in pai_partes:
+            if p in atual and atual[p]['tipo'] == 'diretorio':
+                atual = atual[p]['obj']
+            else:
+                raise FileNotFoundError(f"Diretório '{p}' não encontrado em '{path}'")
 
-      destino_diretorio[nome_destino] = self.atual[origem]
-      del self.atual[origem]
-      print(f"'{origem}' movido para '{caminho_destino}'.")
+        return atual, nome_final
+
+    def mover(self, origem_path: str, destino_path: str) -> bool:
+        # resolve origem
+        try:
+            src_dir, src_name = self._resolve_path(origem_path)
+        except FileNotFoundError as e:
+            print("Erro:", e)
+            return False
+
+        if src_name not in src_dir:
+            print(f"Erro: origem '{origem_path}' não encontrada")
+            return False
+        item = src_dir[src_name]
+
+        # resolve destino
+        try:
+            dst_dir, dst_name = self._resolve_path(destino_path)
+        except FileNotFoundError as e:
+            print("Erro:", e)
+            return False
+
+        # se dst_name existe e é diretório, movimenta para dentro dele:
+        if dst_name in dst_dir and dst_dir[dst_name]['tipo'] == 'diretorio':
+            final_dir = dst_dir[dst_name]['obj']
+            final_name = src_name
+        else:
+            # senão assume que dst_name é o novo nome (renomeação)
+            final_dir = dst_dir
+            final_name = dst_name
+
+        if final_name in final_dir:
+            print(f"Erro: '{final_name}' já existe em '{destino_path}'")
+            return False
+
+        # faz o move
+        final_dir[final_name] = item
+        del src_dir[src_name]
+        print(f"'{origem_path}' movido para '{destino_path}' com sucesso")
+        return True
 
     def escrever_arquivo(self, nome, dados):
         if nome not in self.atual or self.atual[nome]["tipo"] != "arquivo":

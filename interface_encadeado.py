@@ -21,9 +21,9 @@ def main():
             nome = args[0]
             tamanho = int(args[1]) if len(args) > 1 else 0
             fs.criar(nome, "arquivo", tamanho)
-        elif c == "move":
+        elif c == "mv":
             if len(args) < 2:
-                print("Uso: move <origem> <destino>")
+                print("Uso: mv <origem> <destino>")
             else:
                 fs.mover(args[0], args[1])
         elif c == "write":
@@ -35,7 +35,7 @@ def main():
         elif c == "exit":
             break
         else:
-            print("Comandos: ls, cd, mkdir, touch, write, read, rm, exit")
+            print("Comandos: ls, cd, mkdir, touch, mv, write, read, rm, exit")
 
 if __name__ == "__main__":
     main()
