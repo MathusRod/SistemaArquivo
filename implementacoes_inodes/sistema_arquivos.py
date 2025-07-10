@@ -1,5 +1,5 @@
 import uuid
-from implementacoes_inode.inode import Inode
+from .inode import Inode
 
 class SistemaArquivos:
     def __init__(self):
@@ -92,46 +92,6 @@ class SistemaArquivos:
 
     def mostrar_caminho(self):
         print(self.obter_caminho())
-        
-    def mover(self, origem, destino_nome):
-        """
-        Move um arquivo ou diretório para outro diretório
-        :param origem: Nome do item a ser movido
-        :param destino_nome: Nome do diretório de destino
-        """
-        # Verifica se o item de origem existe
-        if origem not in self.diretorio_atual:
-            print(f"Erro: '{origem}' não encontrado")
-            return False
-            
-        item = self.diretorio_atual[origem]
-        
-        # Verifica se o destino é um diretório válido
-        if destino_nome not in self.diretorio_atual:
-            print(f"Erro: '{destino_nome}' não encontrado")
-            return False
-            
-        destino_item = self.diretorio_atual[destino_nome]
-        if destino_item['inode'].tipo != 'diretorio':
-            print(f"Erro: '{destino_nome}' não é um diretório")
-            return False
-            
-        destino_conteudo = destino_item['conteudo']
-        
-        # Verifica se já existe item com mesmo nome no destino
-        if origem in destino_conteudo:
-            print(f"Erro: '{origem}' já existe no destino")
-            return False
-            
-        # Move o item mantendo o mesmo inode
-        destino_conteudo[origem] = item
-        del self.diretorio_atual[origem]
-        
-        # Atualiza o '..' se for um diretório
-        if item['inode'].tipo == 'diretorio':
-            item['conteudo']['..'] = {'inode': destino_item['inode']}
-            
-        print(f"'{origem}' movido para '{destino_nome}' com sucesso")
 
     def _resolve_path(self, path: str):
         if path.startswith('/'):
