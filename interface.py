@@ -1,4 +1,4 @@
-from implementacoes_inode.sistema_arquivos import SistemaArquivos
+from implementacoes_inodes.sistema_arquivos import SistemaArquivos
 
 def main():
     fs = SistemaArquivos()
