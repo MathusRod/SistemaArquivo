@@ -48,6 +48,24 @@ def main():
                 print("Uso: mv <origem> <destino>")
             else:
                 fs.mover(args[0], args[1])
+
+        elif cmd == "write":
+            if len(args) < 2:
+                print("Uso: write <arquivo> <dados>")
+            else:
+                fs.escrever_arquivo(args[0], " ".join(args[1:]))
+
+        elif cmd == "read":
+            if not args:
+                print("Uso: read <arquivo>")
+            else:
+                fs.ler_arquivo(args[0])
+
+        elif cmd == "rm":
+            if not args:
+                print("Uso: rm <nome>")
+            else:
+                fs.excluir(args[0])
             
         elif cmd == "exit":
             print("Saindo do sistema de arquivos...")

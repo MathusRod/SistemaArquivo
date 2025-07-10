@@ -6,6 +6,7 @@ class SistemaArquivos:
         self.raiz = {}
         self.caminho_atual = []
         self.diretorio_atual = self.raiz
+        self.bloco_dados = {}
         self._criar_raiz()
     
     def _criar_raiz(self):
@@ -181,3 +182,69 @@ class SistemaArquivos:
 
         print(f"'{origem_path}' movido para '{destino_path}' com sucesso")
         return True
+
+    def escrever_arquivo(self, nome, dados):
+        if nome not in self.diretorio_atual:
+            print(f"Erro: '{nome}' não encontrado")
+            return
+
+        item = self.diretorio_atual[nome]
+        inode = item['inode']
+
+        if inode.tipo != 'arquivo':
+            print(f"Erro: '{nome}' não é um arquivo")
+            return
+
+        # Limpa blocos anteriores
+        inode.blocos.clear()
+
+        # Atualiza tamanho
+        inode.tamanho = len(dados)
+
+        # Divide dados em blocos de até 512 bytes
+        for i in range(0, len(dados), 512):
+            bloco_conteudo = dados[i:i+512]
+            bloco_id = f"bloco_{len(self.bloco_dados)}_{uuid.uuid4().hex[:4]}"
+            self.bloco_dados[bloco_id] = bloco_conteudo
+            inode.blocos.append(bloco_id)
+
+        print(f"Dados escritos em '{nome}' com sucesso.")
+
+    def ler_arquivo(self, nome):
+        if nome not in self.diretorio_atual:
+            print(f"Erro: '{nome}' não encontrado")
+            return
+
+        item = self.diretorio_atual[nome]
+        inode = item['inode']
+
+        if inode.tipo != 'arquivo':
+            print(f"Erro: '{nome}' não é um arquivo")
+            return
+
+        print(f"\nConteúdo de '{nome}':")
+        for bloco_id in inode.blocos:
+            dados = self.bloco_dados.get(bloco_id, "")
+            print(dados, end="")
+        print()
+    
+    def excluir(self, nome):
+        if nome not in self.diretorio_atual:
+            print(f"Erro: '{nome}' não encontrado.")
+            return
+
+        item = self.diretorio_atual[nome]
+        inode = item['inode']
+
+        if inode.tipo == 'diretorio' and len(item['conteudo']) > 2:
+            print(f"Erro: diretório '{nome}' não está vazio.")
+            return
+
+        # Limpa inode e blocos
+        inode.blocos.clear()
+        inode.tamanho = 0
+
+        if inode.tipo == 'arquivo' and 'conteudo' in item:
+            item['conteudo'].clear()
+
+        del self.diretorio_atual[nome]
