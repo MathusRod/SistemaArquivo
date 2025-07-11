@@ -3,7 +3,6 @@ from implementacoes_inodes.sistema_arquivos import SistemaArquivos
 def main():
     fs = SistemaArquivos()
     
-    # Cria estrutura inicial de exemplo
     fs.criar("documentos", "diretorio")
     fs.criar("imagens", "diretorio")
     fs.criar("arquivo.txt", "arquivo", 1024)

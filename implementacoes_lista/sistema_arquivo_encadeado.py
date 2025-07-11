@@ -76,13 +76,12 @@ class SistemaArquivosEncadeado:
     
     def _resolve_path(self, path: str):
         if path.startswith('/'):
-            base = []                  # partir do root
+            base = []                  
             partes = [p for p in path.split('/') if p]
         else:
-            base = list(self.caminho)  # partir do diretório atual
+            base = list(self.caminho)  
             partes = [p for p in path.split('/') if p]
 
-        # 2) junta e normaliza “.” e “..”
         stack = []
         for p in base + partes:
             if p == '.' or p == '':
@@ -93,14 +92,11 @@ class SistemaArquivosEncadeado:
             else:
                 stack.append(p)
 
-        # 3) separa em “pai” + “nome_final”
         if not stack:
-            # movendo/operando no próprio /
             return self.raiz, ''
         pai_partes = stack[:-1]
         nome_final = stack[-1]
 
-        # 4) caminha do root até o “pai”
         atual = self.raiz
         for p in pai_partes:
             if p in atual and atual[p]['tipo'] == 'diretorio':
@@ -111,7 +107,6 @@ class SistemaArquivosEncadeado:
         return atual, nome_final
 
     def mover(self, origem_path: str, destino_path: str) -> bool:
-        # resolve origem
         try:
             src_dir, src_name = self._resolve_path(origem_path)
         except FileNotFoundError as e:
@@ -123,19 +118,16 @@ class SistemaArquivosEncadeado:
             return False
         item = src_dir[src_name]
 
-        # resolve destino
         try:
             dst_dir, dst_name = self._resolve_path(destino_path)
         except FileNotFoundError as e:
             print("Erro:", e)
             return False
 
-        # se dst_name existe e é diretório, movimenta para dentro dele:
         if dst_name in dst_dir and dst_dir[dst_name]['tipo'] == 'diretorio':
             final_dir = dst_dir[dst_name]['obj']
             final_name = src_name
         else:
-            # senão assume que dst_name é o novo nome (renomeação)
             final_dir = dst_dir
             final_name = dst_name
 
@@ -143,7 +135,6 @@ class SistemaArquivosEncadeado:
             print(f"Erro: '{final_name}' já existe em '{destino_path}'")
             return False
 
-        # faz o move
         final_dir[final_name] = item
         del src_dir[src_name]
         print(f"'{origem_path}' movido para '{destino_path}' com sucesso")
