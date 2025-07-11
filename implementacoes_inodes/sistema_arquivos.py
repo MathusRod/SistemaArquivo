@@ -109,21 +109,17 @@ class SistemaArquivos:
         return atual, partes[-1]
 
     def mover(self, origem_path, destino_path):
-        # resolve origem
         src_dir, src_name = self._resolve_path(origem_path)
         if src_name not in src_dir:
             print(f"Erro: origem '{origem_path}' não encontrado")
             return False
         item = src_dir[src_name]
 
-        # resolve destino
         dst_dir, dst_name = self._resolve_path(destino_path)
-        # se o destino apontar para um diretório, usamos o mesmo nome_src
         if dst_name in dst_dir and dst_dir[dst_name]['inode'].tipo == 'diretorio':
             destino_conteudo = dst_dir[dst_name]['conteudo']
             final_name = src_name
         else:
-            # caso queira renomear ao mover
             destino_conteudo = dst_dir
             final_name = dst_name
 
@@ -131,11 +127,9 @@ class SistemaArquivos:
             print(f"Erro: '{final_name}' já existe no destino")
             return False
 
-        # faz a movimentação
         destino_conteudo[final_name] = item
         del src_dir[src_name]
 
-        # se for diretório, atualiza o '..'
         if item['inode'].tipo == 'diretorio':
             parent_inode = dst_dir[dst_name]['inode'] if dst_name in dst_dir else dst_dir['.']['inode']
             item['conteudo']['..'] = {'inode': parent_inode}
@@ -155,13 +149,10 @@ class SistemaArquivos:
             print(f"Erro: '{nome}' não é um arquivo")
             return
 
-        # Limpa blocos anteriores
         inode.blocos.clear()
 
-        # Atualiza tamanho
         inode.tamanho = len(dados)
 
-        # Divide dados em blocos de até 512 bytes
         for i in range(0, len(dados), 512):
             bloco_conteudo = dados[i:i+512]
             bloco_id = f"bloco_{len(self.bloco_dados)}_{uuid.uuid4().hex[:4]}"
@@ -200,7 +191,6 @@ class SistemaArquivos:
             print(f"Erro: diretório '{nome}' não está vazio.")
             return
 
-        # Limpa inode e blocos
         inode.blocos.clear()
         inode.tamanho = 0
 
